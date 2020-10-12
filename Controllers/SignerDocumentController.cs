@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using DigiSign.Models;
 using DigiSign.Helpers;
+using DigiSign.Configs;
+using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
 
 namespace DigiSign.Controllers
 {
@@ -15,14 +18,20 @@ namespace DigiSign.Controllers
         private readonly ILogger<SignerDocumentController> _logger;
         private IDigiSignRepository _repository;
         private AuthHelper _authHelper;
+        private App _app;
+        private SignerHelper _signerHelper;
 
-        public SignerDocumentController(ILogger<SignerDocumentController> logger, IDigiSignRepository repo, AuthHelper authHelper)
+        public SignerDocumentController(ILogger<SignerDocumentController> logger, IDigiSignRepository repo, 
+            AuthHelper authHelper, IHostingEnvironment _hostingEnvironment)
         {
             _logger = logger;
             _repository = repo;
 
             _authHelper = authHelper;
             _authHelper.initRepo(repo);
+
+            _app = new App(_hostingEnvironment);
+            _signerHelper = new SignerHelper(authHelper, repo);
         }
 
         public IActionResult Index()
@@ -30,7 +39,7 @@ namespace DigiSign.Controllers
             return View();
         }
 
-        public IActionResult Open(string id)
+        public async Task<IActionResult> Open(string id)
         {
             string document_key = id;
             var user = _authHelper.User();
@@ -65,6 +74,53 @@ namespace DigiSign.Controllers
                     }
 
                 }
+            }
+
+            if (s_request.status == "Draft" && s_request.sender != user.employee_id)
+            {
+                return Redirect("~/Dashboard");
+            }
+
+            var requestDocs = _repository.Signer_Requests.Where(o => o.id == document.request_id).FirstOrDefault();
+
+            if (requestDocs.status == "COMPLETED")
+            {
+                string file_check = _app.Storage + "completed\\" + document.filename;
+
+                if (String.IsNullOrEmpty(document.guid))
+                {
+                    var token = await _signerHelper.GetToken();
+                    _signerHelper.StoreToFileNet(document.filename, document.filename, requestDocs.id, token);
+                }
+
+                if (!System.IO.File.Exists(file_check))
+                {
+                    using (var client = new System.Net.WebClient())
+                    {
+                        int request_id = requestDocs.id;
+                        var token = await _signerHelper.GetToken();
+                        string url_filenet = _signerHelper.GetFileNet(request_id, token);
+                        client.DownloadFile(url_filenet, file_check);
+                    }
+                }
+            }
+
+            if (document == null)
+            {
+                return View("/Errors/Error404");
+            }
+
+            if (document.is_template == "Yes")
+            {
+                lauchLabel = "Manage Fields & Edit";
+                template_fields = JsonConvert.DeserializeObject(document.template_fields);
+                saveWidth = template_fields[0];
+            }
+            else
+            {
+                lauchLabel = "Sign & Edit";
+                template_fields = "";
+                saveWidth = 0;
             }
 
             return View();
