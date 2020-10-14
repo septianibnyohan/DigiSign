@@ -22,9 +22,8 @@ namespace DigiSign.Helpers
 
         public IConfigurationSection Env {
             get{
-                return _config.GetSection("AppSettings");
+                return _config.GetSection("AppConfiguration");
             }
-            
         }
 
         public static bool IsPropertyExist(dynamic settings, string name)

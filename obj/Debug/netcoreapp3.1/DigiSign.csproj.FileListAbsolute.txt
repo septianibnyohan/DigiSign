@@ -75,3 +75,6 @@
 /home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Microsoft.AspNetCore.JsonPatch.dll
 /home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 /home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Newtonsoft.Json.Bson.dll
+/home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Microsoft.Extensions.Logging.Configuration.dll
+/home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Microsoft.Extensions.Logging.Console.dll
+/home/septian/Projects/DigiSign/bin/Debug/netcoreapp3.1/Microsoft.Extensions.Options.ConfigurationExtensions.dll

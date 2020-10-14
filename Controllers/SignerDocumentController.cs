@@ -10,6 +10,8 @@ using DigiSign.Helpers;
 using DigiSign.Configs;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
+using DigiSign.Infrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace DigiSign.Controllers
 {
@@ -20,9 +22,10 @@ namespace DigiSign.Controllers
         private AuthHelper _authHelper;
         private App _app;
         private SignerHelper _signerHelper;
+        private CommonHelper _commonHelper;
 
         public SignerDocumentController(ILogger<SignerDocumentController> logger, IDigiSignRepository repo, 
-            AuthHelper authHelper, IHostingEnvironment _hostingEnvironment)
+            AuthHelper authHelper, IHostingEnvironment _hostingEnvironment, IConfiguration config)
         {
             _logger = logger;
             _repository = repo;
@@ -32,6 +35,7 @@ namespace DigiSign.Controllers
 
             _app = new App(_hostingEnvironment);
             _signerHelper = new SignerHelper(authHelper, repo);
+            _commonHelper = new CommonHelper(config);
         }
 
         public IActionResult Index()
@@ -41,6 +45,8 @@ namespace DigiSign.Controllers
 
         public async Task<IActionResult> Open(string id)
         {
+            HttpContext.Session.Set(Auth.Session, "1");
+
             string document_key = id;
             var user = _authHelper.User();
 
@@ -52,12 +58,12 @@ namespace DigiSign.Controllers
             var saveWidth = 0;
             string lauchLabel;
 
-            var document = _repository.Signer_Files.Where(o => o.document_key == document_key).FirstOrDefault();
-            var s_request = _repository.Signer_Requests.Where(o => o.id == document.request_id).FirstOrDefault();
+            var document = _repository.signer_file.Where(o => o.document_key == document_key).FirstOrDefault();
+            var s_request = _repository.signer_requests.Where(o => o.id == document.request_id).FirstOrDefault();
 
             bool isShowBtnDownload = true;
 
-            var check = _repository.Signer_Workflows.Where(o => o.request_id == document.request_id && o.employee_id.ToString() == user.employee_id).FirstOrDefault();
+            var check = _repository.signer_workflow.Where(o => o.request_id == document.request_id && o.employee_id.ToString() == user.employee_id).FirstOrDefault();
 
             if (check == null)
             {
@@ -66,7 +72,7 @@ namespace DigiSign.Controllers
                 if (s_request.sender != user.employee_id)
                 {
                     isShowBtnDownload = false;
-                    var check_share = _repository.Signer_Files_Shares.Where(o => o.request_id == document.request_id && o.employee_id == user.employee_id).FirstOrDefault();
+                    var check_share = _repository.signer_files_share.Where(o => o.request_id == document.request_id && o.employee_id == user.employee_id).FirstOrDefault();
 
                     if (check_share == null)
                     {
@@ -81,7 +87,7 @@ namespace DigiSign.Controllers
                 return Redirect("~/Dashboard");
             }
 
-            var requestDocs = _repository.Signer_Requests.Where(o => o.id == document.request_id).FirstOrDefault();
+            var requestDocs = _repository.signer_requests.Where(o => o.id == document.request_id).FirstOrDefault();
 
             if (requestDocs.status == "COMPLETED")
             {
@@ -123,6 +129,8 @@ namespace DigiSign.Controllers
                 saveWidth = 0;
             }
 
+            ViewBag.requestDocs_status = "PROGRESS";
+
             return View();
         }
 
@@ -141,8 +149,8 @@ namespace DigiSign.Controllers
         {
             string document_key = id;
 
-            var document = _repository.Signer_Files.Where(o => o.document_key == document_key).FirstOrDefault();
-            var request = _repository.Signer_Requests.Where(o => o.id == document.request_id).FirstOrDefault();
+            var document = _repository.signer_file.Where(o => o.document_key == document_key).FirstOrDefault();
+            var request = _repository.signer_requests.Where(o => o.id == document.request_id).FirstOrDefault();
 
             var net = new System.Net.WebClient();
             //http://103.195.31.221/filenet/MPnCF4uaZscG2oJLJ5JcyU94VoPt4A05.pdf
@@ -151,6 +159,20 @@ namespace DigiSign.Controllers
             var contentType = "APPLICATION/octet-stream";
             var fileName = document.filename;
             return File(content, contentType, fileName);
+        }
+
+        public IActionResult Revoke()
+        {
+            var requestId = Convert.ToInt32(Request.Form["request_id"]);
+            var reason = (string)Request.Form["reason"];
+
+            var revoked = _repository.signer_requests.First(o => o.id == requestId);
+            revoked.status = "Revoked";
+            _repository.SaveChanges();
+
+            var resp = _commonHelper.Responder("success", "Alright!", "Document successfully saved.",
+                                    "redirect('"+_commonHelper.Env.GetValue<string>("APP_URL")+"/SignerDocument/DocsMonitoring');", true, "swal");
+            return Content(JsonConvert.SerializeObject(resp), "application/json");
         }
     }
 }

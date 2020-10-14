@@ -57,11 +57,11 @@ namespace DigiSign.Controllers
                 }
 
                 var form_document_key = Request.Form["document_key"].ToString();
-                var document = repository.Signer_Files.Where(o => o.document_key == form_document_key).FirstOrDefault();
+                var document = repository.signer_file.Where(o => o.document_key == form_document_key).FirstOrDefault();
                 _signerHelper.Logging("Assign Pointing Signature, The Request Signature Req ID:" + document.request_id);
-                var requestsData = repository.Signer_Requests.Where(o => o.id == document.request_id).Where(o => o.next_order == 0)
+                var requestsData = repository.signer_requests.Where(o => o.id == document.request_id).Where(o => o.next_order == 0)
                         .Where(o => o.status == "Draft").FirstOrDefault();
-                var workflow = repository.Signer_Workflows.Where(o => o.request_id == document.request_id).Select(o => o.email).ToList();
+                var workflow = repository.signer_workflow.Where(o => o.request_id == document.request_id).Select(o => o.email).ToList();
                 var name = JsonConvert.DeserializeObject(Request.Form["name"]);
                 var emails = JsonConvert.DeserializeObject<dynamic>(Request.Form["emails"]);
 
@@ -151,7 +151,7 @@ namespace DigiSign.Controllers
                     var signingKey = RandomGenerator.RandomString(32);
                     string employee_email = email.employee_email;
 
-                    var result = repository.Signer_Workflows.Where(o => o.request_id == document.request_id && 
+                    var result = repository.signer_workflow.Where(o => o.request_id == document.request_id && 
                         o.document == document.document_key && o.email == employee_email).ToList();
                     result.ForEach(o =>
                     {
@@ -170,12 +170,12 @@ namespace DigiSign.Controllers
 
                 if (requestsData.workflow_method == "SEQUENCE")
                 {
-                    var sendEmail = repository.Signer_Workflows.Where(o => o.request_id == document.request_id).Where(o => o.status == "PENDING" && o.notes == "SEQUENCE" && o.order_by == requestsData.next_order);
+                    var sendEmail = repository.signer_workflow.Where(o => o.request_id == document.request_id).Where(o => o.status == "PENDING" && o.notes == "SEQUENCE" && o.order_by == requestsData.next_order);
 
                     foreach (var sent in sendEmail)
                     {
-                        var employee = repository.Signer_Employees.FirstOrDefault(o => o.employee_id == requestsData.sender);
-                        var employee_to = repository.Signer_Employees.Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
+                        var employee = repository.signer_employee.FirstOrDefault(o => o.employee_id == requestsData.sender);
+                        var employee_to = repository.signer_employee.Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
                         //var category = repository..signer_m_docs_category.Where(o => o.category_id == document.category_id).FirstOrDefault();
                         //var signingLink = CommonHelper.Env["APP_URL"] + "/Guest/Open/" + sent.document + "?signingkey=" + sent.signing_key;
                     }

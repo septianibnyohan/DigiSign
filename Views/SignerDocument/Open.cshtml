@@ -181,12 +181,24 @@
         <div class="page-title" style="overflow:visible;">
             <div class="pull-right page-actions">
 
-                    <button class="btn btn-warning btn-disable"> <span>Draft</span> </button>
+                    @if (@ViewBag.requestDocs_status == "Draft")
+                    {
+                        <button class="btn btn-warning btn-disable"> <span>Draft</span> </button>
+                         <button class="btn btn-danger send-to-server-click" data="requestid:27|file:23|csrf-token:c6gP0v-kfQ5luvAHP-SPofZeDizP2whZq9aDgIYRD63U6kaMbNbcEVazf34g097tjJgjOCwqa44wCPFk0wCc_U0Wx-XwsTA_gddYgvyhZ9M1" url="/SignerDocument/Delete" warning-title="Are you sure?" warning-message="This request will be removed." warning-button="Yes, Delete" loader="true"><i class="ion-ios-minus-outline"></i><span> Delete</span></button>
+                        <button class="btn btn-success" onclick="validateRequest()" data-backdrop="static" data-keyboard="false"><i class="ion-ios-plus-outline"></i><span> Place Signature</span></button>
+                    }
+                    else if(@ViewBag.requestDocs_status == "PROGRESS")
+                    {
+                        <button class="btn btn-warning btn-disable"> <span>PROGRESS</span> </button>
+                        <button class="btn btn-danger" onclick="$('#modal-cancel').modal()"><i class="ion-ios-close-outline"></i> <span>Cancel</span> </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-warning btn-disable"> <span>Draft</span> </button>
+                    }
 
 
-
-                    <button class="btn btn-danger send-to-server-click" data="requestid:27|file:23|csrf-token:c6gP0v-kfQ5luvAHP-SPofZeDizP2whZq9aDgIYRD63U6kaMbNbcEVazf34g097tjJgjOCwqa44wCPFk0wCc_U0Wx-XwsTA_gddYgvyhZ9M1" url="/SignerDocument/Delete" warning-title="Are you sure?" warning-message="This request will be removed." warning-button="Yes, Delete" loader="true"><i class="ion-ios-minus-outline"></i><span> Delete</span></button>
-                    <button class="btn btn-success" onclick="validateRequest()" data-backdrop="static" data-keyboard="false"><i class="ion-ios-plus-outline"></i><span> Place Signature</span></button>
+                   
                     <div class="dropdown" style="display: none;">
                         <button class="btn btn-primary dropdown-toggle btn-responsive" data-toggle="dropdown"><i class="ion-arrow-down-b"></i> More </button>
                         <ul class="dropdown-menu document-menu">
@@ -916,6 +928,46 @@ SEQUENCE                                                </em>
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-cancel" role="dialog">
+        <div class="close-modal" data-dismiss="modal">×</div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Cancel Reason</h4>
+                </div>
+
+                <form class="simcy-form" action="/SignerDocument/Revoke" loader="true" method="POST">
+                    <div class="modal-body" style="">
+                        <p>Please type your reason to cancel this document.</p>
+                        <div class="form-group">
+                            <label>Reason</label>
+
+                        </div>
+                        <div class="row ">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <textarea name="reason-decline" class="form-control" rows="5" id="reason-decline" maxlength="200"
+                                              required></textarea>
+                                    <input type="hidden" name="requestid" value="27" />
+                                    <input type="hidden" name="file" value="23" />
+                                    <input type="hidden" name="signingKey" value="JPEgCT0McgAr7rP7k4Yik9nan86JZrGm" />
+                                    <input type="hidden" name="csrf-token" value="U_cDWiDCi4HCqkCx1XbLZXfkPUMdJ-fRWu5-OWE6nvNMhXJuMq9O5oYXrwFwaDAVR0vMbExXHQNcMOskYYILT9mWbbDAwBuM-mRzQU-b60M1" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </div>
+                </form>
+            </div>
+
         </div>
     </div>
 

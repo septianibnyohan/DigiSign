@@ -2,10 +2,12 @@ using System.Linq;
 
 namespace DigiSign.Models {
     public interface IDigiSignRepository {
-        IQueryable<signer_employee> Signer_Employees { get; }
-        IQueryable<signer_requests> Signer_Requests { get; }
-        IQueryable<signer_file> Signer_Files { get; }
-        IQueryable<signer_workflow> Signer_Workflows { get; }
-        IQueryable<signer_files_share> Signer_Files_Shares { get; }
+        IQueryable<signer_employee> signer_employee { get; }
+        IQueryable<signer_requests> signer_requests { get; }
+        IQueryable<signer_file> signer_file { get; }
+        IQueryable<signer_workflow> signer_workflow { get; }
+        IQueryable<signer_files_share> signer_files_share { get; }
+
+        void SaveChanges();
     }
 }

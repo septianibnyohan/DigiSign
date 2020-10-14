@@ -41,7 +41,7 @@ namespace DigiSign.Helpers
             //var userid = HttpContext.Current.Session[Auth.Session].ToString();
             var employee_id = _httpContext.Session.GetString(Auth.Session);
            
-            var query = _repository.Signer_Employees.Where(s => s.employee_id == employee_id).FirstOrDefault<signer_employee>();
+            var query = _repository.signer_employee.Where(s => s.employee_id == employee_id).FirstOrDefault<signer_employee>();
             return query;
 
         }

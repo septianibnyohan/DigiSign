@@ -6,11 +6,15 @@ namespace DigiSign.Models {
         public EFDigiSignRepository(docsdevEntities ctx) {
             context = ctx;
         }
-        public IQueryable<signer_employee> Signer_Employees => context.signer_employee;
-        public IQueryable<signer_requests> Signer_Requests => context.signer_requests;
-        public IQueryable<signer_file> Signer_Files => context.signer_file;
-        public IQueryable<signer_workflow> Signer_Workflows => context.signer_workflow;
-        public IQueryable<signer_files_share> Signer_Files_Shares => context.signer_files_share;
+        public IQueryable<signer_employee> signer_employee => context.signer_employee;
+        public IQueryable<signer_requests> signer_requests => context.signer_requests;
+        public IQueryable<signer_file> signer_file => context.signer_file;
+        public IQueryable<signer_workflow> signer_workflow => context.signer_workflow;
+        public IQueryable<signer_files_share> signer_files_share => context.signer_files_share;
+
+        public void SaveChanges() {
+            context.SaveChanges();
+        }
 
     }
 }

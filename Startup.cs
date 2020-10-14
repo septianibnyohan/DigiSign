@@ -13,11 +13,25 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Http;
 using DigiSign.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace DigiSign
 {
     public class Startup
     {
+        //static LoggerFactory object
+        public static ILoggerFactory GetLoggerFactory()
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging(builder =>
+                    builder.AddConsole()
+                            .AddFilter(DbLoggerCategory.Database.Command.Name, 
+                                    LogLevel.Information)); 
+            return serviceCollection.BuildServiceProvider()
+                    .GetService<ILoggerFactory>();
+        }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,7 +45,9 @@ namespace DigiSign
             services.AddControllersWithViews();
             
             services.AddDbContext<docsdevEntities>(opts => {
-                opts.UseSqlServer(
+                opts.UseLoggerFactory(GetLoggerFactory())
+                    .EnableSensitiveDataLogging()
+                    .UseSqlServer(
                     Configuration["ConnectionStrings:DigiSignConnection"]);
             });
             services.AddScoped<IDigiSignRepository, EFDigiSignRepository>();
