@@ -12,6 +12,7 @@ namespace DigiSign.Models
         public virtual DbSet<signer_requests> signer_requests { get; set; }
         public virtual DbSet<signer_workflow> signer_workflow { get; set; }
         public virtual DbSet<signer_files_share> signer_files_share {get;set;}
+        public virtual DbSet<signer_m_docs_category> signer_m_docs_category {get;set;}
     
         // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         // {

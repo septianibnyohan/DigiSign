@@ -7,6 +7,7 @@ namespace DigiSign.Models {
         IQueryable<signer_file> signer_file { get; }
         IQueryable<signer_workflow> signer_workflow { get; }
         IQueryable<signer_files_share> signer_files_share { get; }
+        IQueryable<signer_m_docs_category> signer_m_docs_category { get; }
 
         void SaveChanges();
     }

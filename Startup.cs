@@ -15,6 +15,8 @@ using DigiSign.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using DigiSign.Settings;
+using DigiSign.Services;
 
 namespace DigiSign
 {
@@ -50,6 +52,10 @@ namespace DigiSign
                     .UseSqlServer(
                     Configuration["ConnectionStrings:DigiSignConnection"]);
             });
+
+            services.Configure<AppConfiguration>(Configuration.GetSection("AppConfiguration"));
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<IMailService, Services.MailService>();
             services.AddScoped<IDigiSignRepository, EFDigiSignRepository>();
             services.AddDistributedMemoryCache();
             services.AddSession(options => {

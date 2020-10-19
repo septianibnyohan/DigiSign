@@ -14402,6 +14402,11 @@
       "FileKind": "mvc"
     },
     {
+      "FilePath": "/home/septian/Projects/DigiSign/Views/SignerDocument/DocsMonitoring.cshtml",
+      "TargetPath": "Views\\SignerDocument\\DocsMonitoring.cshtml",
+      "FileKind": "mvc"
+    },
+    {
       "FilePath": "/home/septian/Projects/DigiSign/Views/Shared/Error.cshtml",
       "TargetPath": "Views\\Shared\\Error.cshtml",
       "FileKind": "mvc"

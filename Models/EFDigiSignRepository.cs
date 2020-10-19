@@ -11,6 +11,7 @@ namespace DigiSign.Models {
         public IQueryable<signer_file> signer_file => context.signer_file;
         public IQueryable<signer_workflow> signer_workflow => context.signer_workflow;
         public IQueryable<signer_files_share> signer_files_share => context.signer_files_share;
+        public IQueryable<signer_m_docs_category> signer_m_docs_category => context.signer_m_docs_category;
 
         public void SaveChanges() {
             context.SaveChanges();

@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using DigiSign.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using DigiSign.Services;
+using Microsoft.Extensions.Options;
+using DigiSign.Settings;
 
 namespace DigiSign.Controllers
 {
@@ -23,9 +26,13 @@ namespace DigiSign.Controllers
         private App _app;
         private SignerHelper _signerHelper;
         private CommonHelper _commonHelper;
+        private LDAPService _ldapservice;
+        private readonly IMailService _mailService;
+        private readonly AppConfiguration _appConfig;
 
         public SignerDocumentController(ILogger<SignerDocumentController> logger, IDigiSignRepository repo, 
-            AuthHelper authHelper, IHostingEnvironment _hostingEnvironment, IConfiguration config)
+            AuthHelper authHelper, IHostingEnvironment _hostingEnvironment, IConfiguration config, 
+            IMailService mailService, IOptions<AppConfiguration> appConfig)
         {
             _logger = logger;
             _repository = repo;
@@ -36,6 +43,8 @@ namespace DigiSign.Controllers
             _app = new App(_hostingEnvironment);
             _signerHelper = new SignerHelper(authHelper, repo);
             _commonHelper = new CommonHelper(config);
+            _mailService = mailService;
+            _appConfig = appConfig.Value;
         }
 
         public IActionResult Index()
@@ -134,6 +143,11 @@ namespace DigiSign.Controllers
             return View();
         }
 
+        public IActionResult DocsMonitoring()
+        {
+            return View("DocsMonitoring");
+        }
+
         public IActionResult Privacy()
         {
             return View();
@@ -161,14 +175,64 @@ namespace DigiSign.Controllers
             return File(content, contentType, fileName);
         }
 
-        public IActionResult Revoke()
+        public async Task<IActionResult> Revoke()
         {
+            var user = _authHelper.User();
+            var username = HttpContext.Session.Get("username");
+            var password = (string)Request.Form["password"];
+            var ldap = _ldapservice.Login(username, password);
+
             var requestId = Convert.ToInt32(Request.Form["request_id"]);
-            var reason = (string)Request.Form["reason"];
+            var reason = (string)Request.Form["reason-cancel"];
 
             var revoked = _repository.signer_requests.First(o => o.id == requestId);
-            revoked.status = "Revoked";
+            revoked.status = "REVOKED";
+            revoked.reason = reason;
             _repository.SaveChanges();
+
+            // var request = new MailRequest{
+            //     ToEmail = "septianibnyohan@gmail.com",
+            //     Body = "Test",
+            //     Subject = "Keren Amat"
+            // };
+            // await _mailService.SendEmailAsync(request);
+
+            var email_to = new EmailTo
+            {
+                To = new List<String>(),
+                Cc = new List<String>()
+            };
+
+            var signer_file = _repository.signer_file.FirstOrDefault(o => o.request_id == requestId);
+            var category = _repository.signer_m_docs_category.FirstOrDefault(o => o.category_id == signer_file.category_id);
+
+            var documentLink = _appConfig.APP_URL + "/SignerDocument/Open/" + signer_file.document_key;
+            var emails = _repository.signer_workflow.Where(o => o.request_id == requestId && o.status == "APPROVED").Select(o => o.email).ToList();
+
+            foreach (var email in emails)
+            {
+                email_to.To.Add(email);
+            }
+
+            var employee = _repository.signer_employee.FirstOrDefault(o => o.employee_id == user.employee_id);
+
+            var send = await _mailService.Send(email_to, "[ONESIGN] Document Cancel by " + employee.employee_name,
+                new MailBasic
+                {
+                    Title = "Signing invitation declined.",
+                    SubTitle = "Click the link below to view document.",
+                    ButtonText = "View Document",
+                    ButtonLink = documentLink,
+                    Message = employee.employee_email + " has cancel the document you had signed. " +
+                        "<br><br> Request ID : 000000" + requestId +
+                    "<br>Requestor : " + employee.employee_name +
+                    " </br>Document Name : " + signer_file.name + "<br> Category : " +
+                    category.category_name +
+                    "<br><br>Reason : <br>" +
+                    reason.Replace("\r\n", "<br/>") +
+                    "<br><br>Click the link below to view the document.<br><br>Cheers!<br>" + _appConfig.APP_NAME + " Team"
+                },
+            "withbutton");
 
             var resp = _commonHelper.Responder("success", "Alright!", "Document successfully saved.",
                                     "redirect('"+_commonHelper.Env.GetValue<string>("APP_URL")+"/SignerDocument/DocsMonitoring');", true, "swal");

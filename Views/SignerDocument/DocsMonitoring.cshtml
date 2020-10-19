@@ -1,0 +1,808 @@
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Signer ISM">
+    <meta name="author" content="ISM">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/uploads/app/logo-ism.png;">
+    <title>Document Monitoring | Signer ISM</title>
+
+    <!--datatables-->
+    <!-- Ion icons -->
+    <link href="/assets/fonts/ionicons/css/ionicons.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+
+    <link href="/assets/libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/assets/css/simcify.min.css" rel="stylesheet">
+    <!-- Signer CSS -->
+    <link href="/assets/css/style.css" rel="stylesheet">
+    <!--datatables-->
+    <link rel="stylesheet" type="text/css" href="/assets/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/buttons.dataTables.min.css" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/libs/bootstrap/css/datepicker.css" />
+
+</head>
+
+<body>
+
+    <!-- header start -->
+     <!-- {{ session(config("auth.session")) }} -->
+
+
+
+<header>
+    <!-- Hambager -->
+    <div class="humbager">
+        <i class="ion-navicon-round"></i>
+    </div>
+    <!-- logo -->
+    <div class="logo">
+        <a href="/">
+            <img src="/uploads/app/logo-ism.png" class="img-responsive" style="
+    width: 75%;
+">
+        </a>
+    </div>
+
+
+    <!-- top right -->
+    <ul class="nav header-links pull-right">
+        <!-- <li class="notify  hidden-xs">
+            <a href="{{ url('Notification@get') }}" class="notification-holder">
+                <span class="notifications">
+                    <i class="notifications-count ion-ios-bell"></i>
+                </span>
+            </a>
+        </li> -->
+        <li class="profile">
+            <div class="dropdown">
+                <span class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="profile-name"> <span class="hidden-xs"> septian.amral</span> <i class="ion-ios-arrow-down"></i> </span>
+                    <span class="avatar">
+
+                        <img src="/assets/images/avatar.png" class="user-avatar">
+
+                    </span>
+                </span>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                    <li role="presentation">
+                        <a role="menuitem" href="/Settings/Get">
+                            <i class="ion-ios-person-outline"></i> Profile
+                        </a>
+                    </li>
+                    <li role="presentation" class="divider"></li>
+
+
+                    <li role="presentation">
+                        <a role="menuitem" href="/Auth/SignOut">
+                            <i class="ion-ios-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</header>
+
+
+    <!-- sidebar -->
+    
+
+<div class="left-bar ">
+    <div class="slimscroll-menu">
+            <li>
+                <a href="/Dashboard/Get">
+                    <label class="menu-icon"><i class="ion-ios-speedometer"></i> </label><span class="text">Dashboard</span>
+                </a>
+            </li>
+            <!--  <li><a href="<?=url("Notification@get");?>" class="notification-holder">
+            <label class="menu-icon"><i class="ion-ios-bell"></i> </label><span class="text">Notifications</span>
+        </a></li> -->
+
+            <li>
+                <a href="/SignerDocument/Uploads">
+                    <label class="menu-icon"><i class="ion-upload"></i> </label><span class="text">Upload Document</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/SignerDocument/DocsMonitoring">
+                    <label class="menu-icon"><i class="ion-document-text"></i> </label><span class="text">Document Monitoring</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/SignerManagement/Get">
+                    <label class="menu-icon"><i class="ion-folder"></i> </label><span class="text">Document Management</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/SignerRequest/Get">
+                    <label class="menu-icon"><i class="ion-checkmark-circled"></i> </label><span class="text">Approval</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/DocumentChecking/Get">
+                    <label class="menu-icon"><i class="ion-android-search"></i> </label><span class="text">Document Checking</span>
+                </a>
+            </li>
+
+
+            <li>
+                <a href="/MasterData/Index"> <label class="menu-icon"><i class="ion-android-list"></i> </label><span class="text">Master Data</span></a>
+
+            </li>
+
+            <li>
+                <a href="/Settings/Get">
+                    <label class="menu-icon"><i class="ion-gear-a"></i> </label><span class="text">Settings</span>
+                </a>
+
+            </li>
+
+    </div>
+</div>
+
+
+    <div class="content">
+        <div class="page-title">
+            <h3>Documents Monitoring</h3>
+            <p>All pending, complete and declined signing requests</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="light-card table-responsive p-b-3em">
+                    <div class="row">
+                        <div class="input-daterange">
+                            <form method="GET">
+                                <div class="col-md-4">
+                                    <input type="text" name="start_date" id="start_date" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="end_date" id="end_date" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary">Search</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <table id="signer-datatable" class="table display companies-list">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Request ID</th>
+                                <th>Document name</th>
+                                <th>Category</th>
+                                <th>Department</th>
+                                <!--
+                                <th>Approval</th>
+                                -->
+                                <th>Date Request</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center w-70">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">00000004</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/"></a>
+                                        </td>
+                                        <td class="text-center"></td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 21, 2020. 14:00</td>
+                                        <td class="text-center">
+                                                <span class="label label-warning">Draft</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="4" href="/SignerDocument/open/">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2</td>
+                                        <td class="text-center">00000027</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/ec0tia9rR8FxGOhj04LdkQAiAUsk8eRC">test qr</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">October 5, 2020. 11:56</td>
+                                        <td class="text-center">
+                                                <span class="label label-primary">PROGRESS</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="27" href="/SignerDocument/open/ec0tia9rR8FxGOhj04LdkQAiAUsk8eRC">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">3</td>
+                                        <td class="text-center">00000025</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/K7FxVfxHW3O2wqoGcHYGuQlrSBl7R15U">test sign 13</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 18:10</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="25" href="/SignerDocument/open/K7FxVfxHW3O2wqoGcHYGuQlrSBl7R15U">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">4</td>
+                                        <td class="text-center">00000024</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/gL6YZgNNHIFq4KTlss0pZ6qdkUy7VI6M">test sign 12</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:59</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="24" href="/SignerDocument/open/gL6YZgNNHIFq4KTlss0pZ6qdkUy7VI6M">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">5</td>
+                                        <td class="text-center">00000023</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/kjO7h0XmVoRfrpKd5VXaAEjJI51VLJDv">test sign 12</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:53</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="23" href="/SignerDocument/open/kjO7h0XmVoRfrpKd5VXaAEjJI51VLJDv">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">6</td>
+                                        <td class="text-center">00000022</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/MnDdXVlUcciimVZv5exUgwcMdR7P6R4c">test sign 12</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:50</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="22" href="/SignerDocument/open/MnDdXVlUcciimVZv5exUgwcMdR7P6R4c">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">7</td>
+                                        <td class="text-center">00000021</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/ybBE3IWhsRLYGJOoMCDAmBmpaOP7Humz">test sign 11</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:43</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="21" href="/SignerDocument/open/ybBE3IWhsRLYGJOoMCDAmBmpaOP7Humz">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">8</td>
+                                        <td class="text-center">00000020</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/xRhCnNqcAPzJkkmg8fMbOecTGmr0M1CF">test sign 10</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:34</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="20" href="/SignerDocument/open/xRhCnNqcAPzJkkmg8fMbOecTGmr0M1CF">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">9</td>
+                                        <td class="text-center">00000019</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/6qxciaJXYi5wg8GAUDbmtSKQMk2ikQYl">test sign 09</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 17:19</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="19" href="/SignerDocument/open/6qxciaJXYi5wg8GAUDbmtSKQMk2ikQYl">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">10</td>
+                                        <td class="text-center">00000018</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/AQN5f6oPQ9z99dVVDjdT5OKeIqY8m13R">test sign 08</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:51</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="18" href="/SignerDocument/open/AQN5f6oPQ9z99dVVDjdT5OKeIqY8m13R">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">11</td>
+                                        <td class="text-center">00000017</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/hL9QCGT4PAIpaO9y9D5HqgRex1Cxi313">test sign 07</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:46</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="17" href="/SignerDocument/open/hL9QCGT4PAIpaO9y9D5HqgRex1Cxi313">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">12</td>
+                                        <td class="text-center">00000016</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/Xvfmy2Vpo1MlwBl2NpV0MT5CfCy8pqe4">test sign 06</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:42</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="16" href="/SignerDocument/open/Xvfmy2Vpo1MlwBl2NpV0MT5CfCy8pqe4">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">13</td>
+                                        <td class="text-center">00000015</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/hLdXUivBoHZIb3nSa5i2lJmvzZGnrTlN">test</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:41</td>
+                                        <td class="text-center">
+                                                <span class="label label-primary">PROGRESS</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="15" href="/SignerDocument/open/hLdXUivBoHZIb3nSa5i2lJmvzZGnrTlN">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">14</td>
+                                        <td class="text-center">00000014</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/Q9hDmLlelSv2skjsh0nRNZePFSTu02Tj">test sign 03</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:30</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="14" href="/SignerDocument/open/Q9hDmLlelSv2skjsh0nRNZePFSTu02Tj">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">15</td>
+                                        <td class="text-center">00000013</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/0NSjZg792XUhSIFljMrCOVL0XG7BMNcR">keren aja deh</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 16:14</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="13" href="/SignerDocument/open/0NSjZg792XUhSIFljMrCOVL0XG7BMNcR">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">16</td>
+                                        <td class="text-center">00000008</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/7BJoutYyQw1XaX6HPMXbGfqviddS81fv">test approve 01</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 29, 2020. 11:39</td>
+                                        <td class="text-center">
+                                                <span class="label label-success">COMPLETED</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="8" href="/SignerDocument/open/7BJoutYyQw1XaX6HPMXbGfqviddS81fv">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">17</td>
+                                        <td class="text-center">00000005</td>
+
+                                        <td class="text-center">
+                                            <a href="/SignerDocument/Open/4AtYZ59q4qE7ehdvBdKgX3JrqpGVXIy1">test</a>
+                                        </td>
+                                        <td class="text-center">REIMBURSEMENT</td>
+                                        <td class="text-center">Integra Solusi Mandiri</td>
+                                        <!--
+                                        <td class="text-center">request.approval_count</td>
+                                            -->
+
+                                        <td class="text-center">September 21, 2020. 14:03</td>
+                                        <td class="text-center">
+                                                <span class="label label-primary">PROGRESS</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <span class="company-action dropdown-toggle" data-toggle="dropdown"><i class="ion-ios-more"></i></span>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li role="presentation">
+                                                        <a class="" data-id="5" href="/SignerDocument/open/4AtYZ59q4qE7ehdvBdKgX3JrqpGVXIy1">View</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- remind modal -->
+    <div class="modal fade" id="remindRequest" role="dialog">
+        <div class="close-modal" data-dismiss="modal">&times;</div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Send reminder</h4>
+                </div>
+                <form class="simcy-form" action="<?=url(" Request@remind");?>
+                    " data-parsley-validate="" loader="true" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label>Message to receiver</label>
+                                    <input type="hidden" name="requestid">
+                                    <input type="hidden" name="csrf-token" value="jNo0ushZVPzM74jA4rdTMPCQZxr8-333OvIcQPxe_EXsQzQd2VNSXQ0F6X2pQzP6ys_5SVFLpzrKYdBMsd9bqnln4J4G1nvuz6XVuiK3IzY1>">
+                                    <textarea class="form-control" name="message" rows="8" required>Hello there,
+
+I hope you are doing well.
+I am writing to remind you about the signing request I had sent earlier.
+
+Cheers!
+Kimeli
+</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Reminder</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- footer -->
+    
+
+<footer>
+    <p class="text-right">&copy; 2020 ISM | All Rights Reserved. Ver 3.2</p>
+</footer>
+
+
+<script type="text/javascript">
+    	var countNotificationsUrl = '/Notification/Count';
+
+</script>
+
+
+    <!-- scripts -->
+    <script src="/assets/js/jquery-3.2.1.min.js"></script>
+
+    <!--libraries-->
+    <script src="/assets/libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="/assets/js/simcify.min.js"></script>
+
+    @* <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.buttons.min.js"></script> *@
+    <script src="/assets/libs/bootstrap/js/bootstrap-datepicker.js"></script>
+
+    <!-- custom scripts -->
+    <script src="/assets/js/app.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#start_date').datepicker({
+                    todayBtn: 'linked',
+                    format: "yyyy-mm-dd",
+                    autoclose: true
+                });
+
+                $('#end_date').datepicker({
+                    todayBtn: 'linked',
+                    format: "yyyy-mm-dd",
+                    autoclose: true
+                });
+
+
+                $('#signer-datatable').DataTable({
+                    //'order': [6, 'desc']
+
+                });
+
+                
+            });
+        </script>
+</body>
+
+</html>
