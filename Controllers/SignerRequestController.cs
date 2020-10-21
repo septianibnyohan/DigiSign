@@ -8,6 +8,9 @@ using System.Linq;
 using System.Collections.Generic;
 using DigiSign.Configs;
 using DigiSign.Infrastructure;
+using Microsoft.Extensions.Options;
+using DigiSign.Settings;
+using System.Threading.Tasks;
 
 namespace DigiSign.Controllers
 {
@@ -16,21 +19,24 @@ namespace DigiSign.Controllers
         // GET: Notification
 
         private readonly IConfiguration _config;
-        private IDigiSignRepository repository;
+        private IDigiSignRepository _repository;
         private AuthHelper _authHelper;
         private SignerHelper _signerHelper;
+        private readonly AppConfiguration _appConfig;
+        private CommonHelper _commonHelper;
         
-        public SignerRequestController(IConfiguration config, IDigiSignRepository repo, AuthHelper authHelper)
+        public SignerRequestController(IConfiguration config, IDigiSignRepository repo, AuthHelper authHelper, 
+            IOptions<AppConfiguration> appConfig)
         {
             _config = config;
-            repository = repo;
+            _repository = repo;
             
             //_authHelper = new AuthHelper(repository);
             _authHelper = authHelper;
             _authHelper.initRepo(repo);
-            _signerHelper = new SignerHelper(_authHelper, repository);
-
-            
+            _signerHelper = new SignerHelper(_authHelper, _repository);
+            _appConfig = appConfig.Value;
+            _commonHelper = new CommonHelper(config);
         }
 
         public ActionResult Index()
@@ -39,7 +45,7 @@ namespace DigiSign.Controllers
         }
 
         [HttpPost]
-        public ContentResult Send()
+        public async Task<ContentResult> Send()
         {
             dynamic respo;
             try
@@ -47,7 +53,7 @@ namespace DigiSign.Controllers
                 HttpContext.Session.Set(Auth.Session, "1");
                 
                 var user = _authHelper.User();
-                var mail = new MailHelper();
+                var mail = new MailHelper(_appConfig);
 
                 if (!ValidateStamperPos(Request.Form["positions"]))
                 {
@@ -57,11 +63,11 @@ namespace DigiSign.Controllers
                 }
 
                 var form_document_key = Request.Form["document_key"].ToString();
-                var document = repository.signer_file.Where(o => o.document_key == form_document_key).FirstOrDefault();
+                var document = _repository.signer_file.Where(o => o.document_key == form_document_key).FirstOrDefault();
                 _signerHelper.Logging("Assign Pointing Signature, The Request Signature Req ID:" + document.request_id);
-                var requestsData = repository.signer_requests.Where(o => o.id == document.request_id).Where(o => o.next_order == 0)
+                var requestsData = _repository.signer_requests.Where(o => o.id == document.request_id).Where(o => o.next_order == 0)
                         .Where(o => o.status == "Draft").FirstOrDefault();
-                var workflow = repository.signer_workflow.Where(o => o.request_id == document.request_id).Select(o => o.email).ToList();
+                var workflow = _repository.signer_workflow.Where(o => o.request_id == document.request_id).Select(o => o.email).ToList();
                 var name = JsonConvert.DeserializeObject(Request.Form["name"]);
                 var emails = JsonConvert.DeserializeObject<dynamic>(Request.Form["emails"]);
 
@@ -151,7 +157,7 @@ namespace DigiSign.Controllers
                     var signingKey = RandomGenerator.RandomString(32);
                     string employee_email = email.employee_email;
 
-                    var result = repository.signer_workflow.Where(o => o.request_id == document.request_id && 
+                    var result = _repository.signer_workflow.Where(o => o.request_id == document.request_id && 
                         o.document == document.document_key && o.email == employee_email).ToList();
                     result.ForEach(o =>
                     {
@@ -170,19 +176,86 @@ namespace DigiSign.Controllers
 
                 if (requestsData.workflow_method == "SEQUENCE")
                 {
-                    var sendEmail = repository.signer_workflow.Where(o => o.request_id == document.request_id).Where(o => o.status == "PENDING" && o.notes == "SEQUENCE" && o.order_by == requestsData.next_order);
+                    var sendEmail = _repository.signer_workflow.Where(o => o.request_id == document.request_id).Where(o => o.status == "PENDING" && o.notes == "SEQUENCE" && o.order_by == requestsData.next_order);
 
                     foreach (var sent in sendEmail)
                     {
-                        var employee = repository.signer_employee.FirstOrDefault(o => o.employee_id == requestsData.sender);
-                        var employee_to = repository.signer_employee.Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
-                        //var category = repository..signer_m_docs_category.Where(o => o.category_id == document.category_id).FirstOrDefault();
-                        //var signingLink = CommonHelper.Env["APP_URL"] + "/Guest/Open/" + sent.document + "?signingkey=" + sent.signing_key;
+                        var employee = _repository.signer_employee.FirstOrDefault(o => o.employee_id == requestsData.sender);
+                        var employee_to = _repository.signer_employee.Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
+                        var category = _repository.signer_m_docs_category.Where(o => o.category_id == document.category_id).FirstOrDefault();
+                        var signingLink = _appConfig.APP_URL + "/Guest/Open/" + sent.document + "?signingKey=" + sent.signing_key;
+                        var trackerLink = _appConfig.APP_URL + "/mailopen?signingKey=" + sent.signing_key;
+
+                        var email_to = new EmailTo
+                        {
+                            To = new List<String> { sent.email }
+                        };
+
+                        var send = await mail.Send(email_to, "[ONESIGN] " + employee.employee_name + " Invites You to Sign Document",
+                            new MailBasic
+                            {
+                                Title = "",
+                                SubTitle = "",
+                                ButtonText = "Sign Now",
+                                ButtonLink = signingLink,
+                                Message = "Dear " + employee_to.employee_name + ",<br><br>You have been invited to sign a document by " + employee.employee_name + "" +
+                                            ". Click the link below to respond to the invite." +
+                                    "<br><br> Request ID : 000000" + sent.request_id +
+                                    "<br>Requestor : " + _signerHelper.GetEmployeeName(requestsData.sender) +
+                                    " <br>Document Name : " + document.name + "<br> Category : " +
+                                    category.category_name + "</br> Message : " + Request.Form["message"] + "<br><br>Regards,<br>"
+                            }, "WithButton");
+
+                        if (!send)
+                        {
+                            var resp = _commonHelper.Responder("Error", "Oops!", "Email Not Send");
+                            return Content(JsonConvert.SerializeObject(resp), "application/json");
+                        }
+                        break;
+
                     }
                 }
                 else if (requestsData.workflow_method == "PARALEL")
                 {
+                    var sendEmail = _repository.signer_workflow.Where(o => o.request_id == document.request_id &&
+                            o.status == "PENDING" && o.notes == "PARALEL" && o.order_by == requestsData.next_order);
 
+                    foreach (var sent in sendEmail)
+                    {
+                        //var employee = context.signer_employee.Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
+                        var employee = _repository.signer_employee.FirstOrDefault(o => o.employee_id == requestsData.sender);
+                        var employee_to = _repository.signer_employee.
+                            Where(o => o.employee_id == sent.employee_id.ToString()).FirstOrDefault();
+                        var category = _repository.signer_m_docs_category.Where(o => o.category_id == document.category_id).FirstOrDefault();
+                        var signingLink = _appConfig.APP_URL+ "/Guest/Open/" + sent.document + "?signingKey=" + sent.signing_key;
+                        var trackerLink = _appConfig.APP_URL + "/mailopen?signingKey=" + sent.signing_key;
+
+                        var email_to = new EmailTo
+                        {
+                            To = new List<String> { sent.email }
+                        };
+
+                        var send = await mail.Send(email_to, "[ONESIGN] " + employee.employee_name + " Invites You to Sign Document",
+                            new MailBasic
+                            {
+                                Title = "",
+                                SubTitle = "",
+                                ButtonText = "Sign Now",
+                                ButtonLink = signingLink,
+                                Message = "Dear " + employee_to.employee_name + ",<br><br>You have been invited to sign a document by " + employee.employee_name + "" +
+                                            ". Click the link below to respond to the invite." +
+                                    "<br><br> Request ID : 000000" + sent.request_id +
+                                    "<br>Requestor : " + _signerHelper.GetEmployeeName(requestsData.sender) +
+                                    " </br>Document Name : " + document.name + "<br> Category : " +
+                                    category.category_name + "</br> Message : " + Request.Form["message"] + "<br><br>Regards,<br>"
+                            }, "WithButton");
+
+                        if (!send)
+                        {
+                            var resp = _commonHelper.Responder("Error", "Oops!", "Email Not Send");
+                            return Content(JsonConvert.SerializeObject(resp), "application/json");
+                        }
+                    }
                 }
                 else if (requestsData.workflow_method == "COMBINE")
                 {
@@ -199,6 +272,30 @@ namespace DigiSign.Controllers
                 respo = new CommonHelper(_config).Responder("error", "Oops!", "Something Error");
                 return Content(JsonConvert.SerializeObject(respo), "application/json");
             }
+        }
+
+        public dynamic SendEmailCombine(docsdevEntities context, signer_file document, signer_requests requestsData, MailHelper mail)
+        {
+            dynamic resp = null;
+            try
+            {
+                var sendEmail = context.signer_workflow.Where(o => o.request_id == document.request_id).
+                            Where(o => o.status == "PENDING").Where(o => o.order_by == requestsData.next_order);
+
+                foreach (var sent in sendEmail)
+                {
+                    if (sent.notes == "SEQUENCE")
+                    {
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //SignerHelper.LogEx(ex);
+                throw ex;
+            }
+
+            return resp;
         }
 
         public bool ValidateStamperPos(string positions)

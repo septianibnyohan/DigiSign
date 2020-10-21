@@ -1,4 +1,5 @@
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace DigiSign.Models {
     public class EFDigiSignRepository : IDigiSignRepository {
@@ -12,6 +13,8 @@ namespace DigiSign.Models {
         public IQueryable<signer_workflow> signer_workflow => context.signer_workflow;
         public IQueryable<signer_files_share> signer_files_share => context.signer_files_share;
         public IQueryable<signer_m_docs_category> signer_m_docs_category => context.signer_m_docs_category;
+        public DbSet<signer_history> signer_history => context.signer_history;
+        public DbSet<signer_logs> signer_logs => context.signer_logs;
 
         public void SaveChanges() {
             context.SaveChanges();

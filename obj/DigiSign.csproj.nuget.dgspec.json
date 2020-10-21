@@ -62,13 +62,13 @@
               "target": "Package",
               "version": "[2.9.2, )"
             },
-            "RazorLight": {
-              "target": "Package",
-              "version": "[2.0.0-beta10, )"
-            },
             "System.DirectoryServices": {
               "target": "Package",
               "version": "[4.7.0, )"
+            },
+            "razorlight": {
+              "target": "Package",
+              "version": "[2.0.0-beta10, )"
             }
           },
           "imports": [

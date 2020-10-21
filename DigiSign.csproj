@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.9" />
     <PackageReference Include="MimeKit" Version="2.9.2" />
-    <PackageReference Include="RazorLight" Version="2.0.0-beta10" />
+    <PackageReference Include="razorlight" Version="2.0.0-beta10" />
     <PackageReference Include="System.DirectoryServices" Version="4.7.0" />
   </ItemGroup>
 

@@ -13,10 +13,11 @@ namespace DigiSign.Helpers
     public class SignerHelper
     {
         private Microsoft.AspNetCore.Http.HttpContext _httpContext;
+        private IHttpContextAccessor _contextAccessor;
         private IDigiSignRepository _repository;
         private AuthHelper _authHelper;
         private string _apiBaseUrl;
-        public SignerHelper(AuthHelper authHelper, IDigiSignRepository repository)
+        public SignerHelper(AuthHelper authHelper, IDigiSignRepository repository, IHttpContextAccessor contextAccessor)
         {
             //_httpContext = httpContext;
             _repository = repository;
@@ -24,27 +25,24 @@ namespace DigiSign.Helpers
             _authHelper = authHelper;
             _authHelper.initRepo(repository);
             _apiBaseUrl = "";
-        }
-        public void Logging(string activity)
-        {
-            var user = _authHelper.User();
-            // using (var context = new docsdevEntities())
-            // {
-            //     lock (logging_lock)
-            //     {
-            //         context.signer_logs.Add(new signer_logs
-            //         {
-            //             activity = activity,
-            //             ip_address = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"],
-            //             users = user == null ? 0 : Convert.ToInt32(user.employee_id),
-            //             uri = HttpContext.Current.Request.ServerVariables["REQUEST_URI"],
-            //             time_ = DateTime.Now
-            //         });
-                    
-            //         context.SaveChanges();
-            //     }
 
-            // }
+            _contextAccessor = contextAccessor;
+        }
+
+        public bool KeepHistory(string document_key, string activity, string type = "default")
+        {
+
+            _repository.signer_history.Add(
+                new signer_history { 
+                    files = document_key, 
+                    activity = activity, 
+                    type = type, 
+                    time_ = DateTime.Now 
+                }
+            );
+            _repository.SaveChanges();
+
+            return true;
         }
 
         public async Task<string> GetToken()
@@ -180,6 +178,45 @@ namespace DigiSign.Helpers
             }
 
             return true;
+        }
+
+        private readonly object logging_lock = new object();
+
+        public void Logging(string activity)
+        {
+            var user = _authHelper.User();
+            _httpContext  = _contextAccessor.HttpContext;
+            var request = _httpContext.Request;
+            UriBuilder uriBuilder = new UriBuilder();
+            uriBuilder.Scheme = request.Scheme;
+            uriBuilder.Host = request.Host.Host;
+            uriBuilder.Path = request.Path.ToString();
+            uriBuilder.Query = request.QueryString.ToString();
+            var request_uri = uriBuilder.Uri.ToString();
+
+            lock (logging_lock)
+            {
+                _repository.signer_logs.Add(new signer_logs
+                {
+                    activity = activity,
+                    ip_address = _httpContext.Connection.RemoteIpAddress.ToString(),
+                    users = user == null ? 0 : Convert.ToInt32(user.employee_id),
+                    uri = request_uri,
+                    time_ = DateTime.Now
+                });
+                _repository.SaveChanges();
+            }
+
+        }
+
+        public string GetEmployeeName(string nik)
+        {
+
+            var signer_employee = _repository.signer_employee.FirstOrDefault(o => o.employee_id == nik);
+
+            if (signer_employee == null) return null;
+
+            return signer_employee.employee_name;
         }
     }
     
