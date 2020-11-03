@@ -146,6 +146,72 @@ namespace DigiSign.Migrations
                     b.ToTable("signer_files_share");
                 });
 
+            modelBuilder.Entity("DigiSign.Models.signer_history", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("activity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("files")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("time_")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("signer_history");
+                });
+
+            modelBuilder.Entity("DigiSign.Models.signer_logs", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("activity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ip_address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("time_")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("uri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("users")
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.ToTable("signer_logs");
+                });
+
+            modelBuilder.Entity("DigiSign.Models.signer_m_docs_category", b =>
+                {
+                    b.Property<int>("category_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("category_name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("category_id");
+
+                    b.ToTable("signer_m_docs_category");
+                });
+
             modelBuilder.Entity("DigiSign.Models.signer_requests", b =>
                 {
                     b.Property<int>("id")

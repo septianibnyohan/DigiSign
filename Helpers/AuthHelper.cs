@@ -26,7 +26,7 @@ namespace DigiSign.Helpers
         /// Get the authenticated user
         /// </summary>
         /// <returns>\Std</returns>
-        public signer_employee User()
+        public SignerEmployee User()
         {
             _httpContext  = _contextAccessor.HttpContext;
             if (_httpContext == null)
@@ -40,10 +40,11 @@ namespace DigiSign.Helpers
 
             //var userid = HttpContext.Current.Session[Auth.Session].ToString();
             var employee_id = _httpContext.Session.GetString(Auth.Session);
-           
-            var query = _repository.signer_employee.Where(s => s.employee_id == employee_id).FirstOrDefault<signer_employee>();
-            return query;
-
+            using (var context = new DigiSignContext())
+            {
+                var query = context.SignerEmployee.Where(s => s.EmployeeId == employee_id).FirstOrDefault();
+                return query;
+            }
         }
     }
 }

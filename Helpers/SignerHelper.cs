@@ -17,16 +17,20 @@ namespace DigiSign.Helpers
         private IDigiSignRepository _repository;
         private AuthHelper _authHelper;
         private string _apiBaseUrl;
-        public SignerHelper(AuthHelper authHelper, IDigiSignRepository repository, IHttpContextAccessor contextAccessor)
+        public SignerHelper(IHttpContextAccessor contextAccessor)
         {
             //_httpContext = httpContext;
+            _apiBaseUrl = "";
+
+            _contextAccessor = contextAccessor;
+        }
+
+        public void initRepo(AuthHelper authHelper, IDigiSignRepository repository)
+        {
             _repository = repository;
             //_authHelper = new AuthHelper(repository, httpContext);
             _authHelper = authHelper;
             _authHelper.initRepo(repository);
-            _apiBaseUrl = "";
-
-            _contextAccessor = contextAccessor;
         }
 
         public bool KeepHistory(string document_key, string activity, string type = "default")
@@ -180,33 +184,52 @@ namespace DigiSign.Helpers
             return true;
         }
 
+        private Uri GetUri()
+        {
+            var request = _contextAccessor.HttpContext.Request;
+            var builder = new UriBuilder();
+            builder.Scheme = request.Scheme;
+            builder.Host = request.Host.Value;
+            builder.Path = request.Path;
+            builder.Query = request.QueryString.ToUriComponent();
+            return builder.Uri;
+        }
+
+        public void LogEx(Exception ex)
+        {
+            string message = "Message : " + ex.Message + ", Stacktrace : " + ex.StackTrace;
+
+            if (ex.InnerException != null)
+            {
+                message += "Inner Message : " + ex.InnerException.Message + ", Inner Stacktrace : " + ex.InnerException.StackTrace;
+            }
+
+            Logging(message);
+        }
+
         private readonly object logging_lock = new object();
 
         public void Logging(string activity)
         {
             var user = _authHelper.User();
-            _httpContext  = _contextAccessor.HttpContext;
-            var request = _httpContext.Request;
-            UriBuilder uriBuilder = new UriBuilder();
-            uriBuilder.Scheme = request.Scheme;
-            uriBuilder.Host = request.Host.Host;
-            uriBuilder.Path = request.Path.ToString();
-            uriBuilder.Query = request.QueryString.ToString();
-            var request_uri = uriBuilder.Uri.ToString();
-
-            lock (logging_lock)
+            using (var context = new DigiSignContext())
             {
-                _repository.signer_logs.Add(new signer_logs
+                lock (logging_lock)
                 {
-                    activity = activity,
-                    ip_address = _httpContext.Connection.RemoteIpAddress.ToString(),
-                    users = user == null ? 0 : Convert.ToInt32(user.employee_id),
-                    uri = request_uri,
-                    time_ = DateTime.Now
-                });
-                _repository.SaveChanges();
-            }
+                    context.SignerLogs.Add(new SignerLogs
+                    {
+                        Activity = activity,
+                        //ip_address = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"],
+                        IpAddress = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                        Users = user == null ? 0 : Convert.ToInt32(user.EmployeeId),
+                        //uri = HttpContext.Current.Request.ServerVariables["REQUEST_URI"],
+                        Uri = GetUri().ToString(),
+                        Time = DateTime.Now
+                    });
+                    context.SaveChanges();
+                }
 
+            }
         }
 
         public string GetEmployeeName(string nik)

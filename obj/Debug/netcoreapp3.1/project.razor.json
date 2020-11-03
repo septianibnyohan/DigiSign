@@ -1,5 +1,5 @@
 {
-  "FilePath": "/home/septian/Projects/DigiSign/DigiSign.csproj",
+  "FilePath": "/home/septian/projects/DigiSign/DigiSign.csproj",
   "Configuration": {
     "ConfigurationName": "MVC-3.0",
     "LanguageVersion": "3.0",
@@ -14392,48 +14392,53 @@
   "RootNamespace": "DigiSign",
   "Documents": [
     {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/Home/Index.cshtml",
-      "TargetPath": "Views\\Home\\Index.cshtml",
-      "FileKind": "mvc"
-    },
-    {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/_ViewImports.cshtml",
-      "TargetPath": "Views\\_ViewImports.cshtml",
-      "FileKind": "mvc"
-    },
-    {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/SignerDocument/DocsMonitoring.cshtml",
-      "TargetPath": "Views\\SignerDocument\\DocsMonitoring.cshtml",
-      "FileKind": "mvc"
-    },
-    {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/Shared/Error.cshtml",
+      "FilePath": "/home/septian/projects/DigiSign/Views/Shared/Error.cshtml",
       "TargetPath": "Views\\Shared\\Error.cshtml",
       "FileKind": "mvc"
     },
     {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/_ViewStart.cshtml",
-      "TargetPath": "Views\\_ViewStart.cshtml",
+      "FilePath": "/home/septian/projects/DigiSign/Views/SignerDocument/Uploads.cshtml",
+      "TargetPath": "Views\\SignerDocument\\Uploads.cshtml",
       "FileKind": "mvc"
     },
     {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/Home/Privacy.cshtml",
-      "TargetPath": "Views\\Home\\Privacy.cshtml",
-      "FileKind": "mvc"
-    },
-    {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/Shared/_ValidationScriptsPartial.cshtml",
-      "TargetPath": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
-      "FileKind": "mvc"
-    },
-    {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/Shared/_Layout.cshtml",
+      "FilePath": "/home/septian/projects/DigiSign/Views/Shared/_Layout.cshtml",
       "TargetPath": "Views\\Shared\\_Layout.cshtml",
       "FileKind": "mvc"
     },
     {
-      "FilePath": "/home/septian/Projects/DigiSign/Views/SignerDocument/Open.cshtml",
+      "FilePath": "/home/septian/projects/DigiSign/Views/_ViewImports.cshtml",
+      "TargetPath": "Views\\_ViewImports.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/Home/Index.cshtml",
+      "TargetPath": "Views\\Home\\Index.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/Shared/_ValidationScriptsPartial.cshtml",
+      "TargetPath": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/_ViewStart.cshtml",
+      "TargetPath": "Views\\_ViewStart.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/SignerDocument/DocsMonitoring.cshtml",
+      "TargetPath": "Views\\SignerDocument\\DocsMonitoring.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/SignerDocument/Open.cshtml",
       "TargetPath": "Views\\SignerDocument\\Open.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "/home/septian/projects/DigiSign/Views/Home/Privacy.cshtml",
+      "TargetPath": "Views\\Home\\Privacy.cshtml",
       "FileKind": "mvc"
     }
   ],

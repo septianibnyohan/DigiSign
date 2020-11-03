@@ -26,7 +26,7 @@ namespace DigiSign.Controllers
         private CommonHelper _commonHelper;
         
         public SignerRequestController(IConfiguration config, IDigiSignRepository repo, AuthHelper authHelper, 
-            IOptions<AppConfiguration> appConfig)
+            IOptions<AppConfiguration> appConfig, SignerHelper signerHelper)
         {
             _config = config;
             _repository = repo;
@@ -34,7 +34,8 @@ namespace DigiSign.Controllers
             //_authHelper = new AuthHelper(repository);
             _authHelper = authHelper;
             _authHelper.initRepo(repo);
-            _signerHelper = new SignerHelper(_authHelper, _repository);
+            _signerHelper = signerHelper;
+            _signerHelper.initRepo(authHelper, repo);
             _appConfig = appConfig.Value;
             _commonHelper = new CommonHelper(config);
         }

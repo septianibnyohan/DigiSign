@@ -44,7 +44,7 @@ namespace DigiSign
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
             
             services.AddDbContext<docsdevEntities>(opts => {
                 opts.UseLoggerFactory(GetLoggerFactory())
@@ -62,6 +62,7 @@ namespace DigiSign
                 options.IdleTimeout = System.TimeSpan.FromSeconds(3600);
             });
             services.AddSingleton<AuthHelper>();
+            services.AddSingleton<SignerHelper>();
             services.AddHttpContextAccessor();
             //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
